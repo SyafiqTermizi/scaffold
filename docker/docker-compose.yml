@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 services:
   database:
@@ -8,7 +8,11 @@ services:
     ports:
       - 5400:5432
 
-  django_app:
+  queue:
+    container_name: celery_queue
+    image: redis:6.2-alpine
+
+  django_app: &base
     build:
       context: ../
       dockerfile: ./docker/Dockerfile
@@ -21,3 +25,11 @@ services:
       - database
     ports:
       - 8000:80
+
+  celery_app:
+    <<: *base
+    command: poetry run celery -A scaffold.bg_tasks worker --loglevel=INFO
+    depends_on:
+      - database
+      - queue
+    ports: []
