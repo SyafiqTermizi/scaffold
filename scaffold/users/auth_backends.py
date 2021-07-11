@@ -6,7 +6,20 @@ from django.http.request import HttpRequest
 from scaffold.users.models import User
 
 
-class EmailBackend(ModelBackend):
+class UsernameBackend(ModelBackend):
+    def user_can_authenticate(self, user: User) -> bool:
+        """
+        Reject users with
+        1. is_active=False.
+        2. is_email_verified=False
+        """
+        if (user.is_staff or user.is_superuser) and user.is_active:
+            # Allow staff and admin to login without verifying email
+            return True
+        return user.is_active and user.is_email_verified
+
+
+class EmailBackend(UsernameBackend):
     """
     Authenticates using Email address
     """
