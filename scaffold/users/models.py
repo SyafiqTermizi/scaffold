@@ -27,3 +27,14 @@ class EmailVerificationToken(models.Model):
 
     def __str__(self) -> str:
         return self.user.username
+
+    @classmethod
+    def verify_token(cls, token):
+        """
+        Set is_email_verified=True and delete token if token is available.
+        Will raise EmailVerificationToken.DoesNotExist if token does not exist
+        """
+        token_instance = cls.objects.get(token=token)
+        token_instance.user.is_email_verified = True
+        token_instance.user.save()
+        token_instance.delete()
