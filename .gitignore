@@ -116,3 +116,6 @@ cython_debug/
 
 ### react ###
 node_modules
+
+### react ###
+.vscode
