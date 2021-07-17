@@ -1,4 +1,7 @@
 import pytest
+
+from rest_framework.test import APIClient
+
 from scaffold.users.tests.factories import UserFactory, EmailVerificationTokenFactory
 
 
@@ -16,3 +19,8 @@ def create_token():
         return EmailVerificationTokenFactory.create(**kwargs)
 
     return fn
+
+
+@pytest.fixture
+def api_client():
+    return APIClient
