@@ -1,7 +1,7 @@
 import factory
 from factory.django import DjangoModelFactory
 
-from scaffold.users.models import User
+from scaffold.users.models import User, EmailVerificationToken
 
 
 class UserFactory(DjangoModelFactory):
@@ -10,3 +10,11 @@ class UserFactory(DjangoModelFactory):
 
     class Meta:
         model = User
+
+
+class EmailVerificationTokenFactory(DjangoModelFactory):
+    token = factory.Faker("paragraph")
+    user = factory.SubFactory(UserFactory)
+
+    class Meta:
+        model = EmailVerificationToken

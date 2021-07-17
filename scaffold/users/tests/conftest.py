@@ -1,10 +1,18 @@
 import pytest
-from scaffold.users.tests.factories import UserFactory
+from scaffold.users.tests.factories import UserFactory, EmailVerificationTokenFactory
 
 
 @pytest.fixture
 def create_user():
     def fn(**kwargs):
         return UserFactory.create(**kwargs)
+
+    return fn
+
+
+@pytest.fixture
+def create_token():
+    def fn(**kwargs):
+        return EmailVerificationTokenFactory.create(**kwargs)
 
     return fn
