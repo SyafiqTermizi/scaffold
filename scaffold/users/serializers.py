@@ -7,10 +7,12 @@ class UserCreationSerializer(serializers.ModelSerializer):
     password_1 = serializers.CharField(
         style={"input_type": "password"},
         trim_whitespace=False,
+        write_only=True,
     )
     password_2 = serializers.CharField(
         style={"input_type": "password"},
         trim_whitespace=False,
+        write_only=True,
     )
 
     class Meta:
