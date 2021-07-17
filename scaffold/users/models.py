@@ -23,7 +23,11 @@ class User(AbstractUser):
 
 class EmailVerificationToken(models.Model):
     token = models.CharField(max_length=255, default=generate_token)
-    user = models.OneToOneField(to=User, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        to=User,
+        on_delete=models.CASCADE,
+        related_name="email_verification_token",
+    )
 
     def __str__(self) -> str:
         return self.user.username
