@@ -6,7 +6,7 @@ from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 
-generate_token = partial(get_random_string, 250)
+generate_token = partial(get_random_string, 30)
 
 
 class User(AbstractUser):
