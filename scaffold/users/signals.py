@@ -1,4 +1,3 @@
-from django.core.mail import send_mail
 from .models import User
 from .tasks import create_token_and_send_email as bg_task
 

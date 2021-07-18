@@ -115,3 +115,21 @@ def test_user_creation_api_view_fail(
     )
     assert response.status_code == 400
     assert response.json() == error
+
+
+def test_email_verification_token_view_valid(db, client, create_token):
+    """
+    /users/verify-token/ URL should return 200 if the token is valid
+    """
+    token = create_token()
+    res = client.get(f"/users/verify-token/{token.token}/")
+    assert res.status_code == 200
+    assert "Your email has been verified" in str(res.content)
+
+
+def test_email_verification_token_view_invalid(db, client):
+    """
+    /users/verify-token/ URL should return 404 if the token is invalid
+    """
+    res = client.get(f"/users/verify-token/invalidtoken/")
+    assert res.status_code == 404
