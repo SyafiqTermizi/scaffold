@@ -1,3 +1,4 @@
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 from .models import User
@@ -37,12 +38,13 @@ class UserCreationSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         validated_data = super().validate(attrs)
-        print(attrs)
+
         if validated_data["password_1"] != validated_data["password_2"]:
             raise serializers.ValidationError(
                 detail="Password Not Match",
                 code="password_mismatch",
             )
+        validate_password(validated_data["password_1"])
         return attrs
 
     def create(self, validated_data):

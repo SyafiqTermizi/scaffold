@@ -77,6 +77,18 @@ def test_user_creation_api_view_success(db, api_client):
                 "email": ["Enter a valid email address."],
             },
         ),
+        pytest.param(
+            "newuser",
+            "newemail@test.com",
+            "abc123",
+            "abc123",
+            {
+                "non_field_errors": [
+                    "This password is too short. It must contain at least 8 characters.",
+                    "This password is too common.",
+                ]
+            },
+        ),
     ],
 )
 def test_user_creation_api_view_fail(
