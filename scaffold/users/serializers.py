@@ -67,6 +67,7 @@ class AuthenticationSerializer(serializers.Serializer):
     )
 
     is_email = False
+    user = None
 
     def validate_username_or_email(self, username_or_email):
         try:
@@ -94,4 +95,5 @@ class AuthenticationSerializer(serializers.Serializer):
         if not user:
             raise serializers.ValidationError("Invalid Username or password")
 
+        self.user = user
         return validated_attrs

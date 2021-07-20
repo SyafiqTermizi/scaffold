@@ -131,3 +131,46 @@ def test_email_verification_token_view_invalid(db, client):
     """
     res = client.get(f"/users/verify-token/invalidtoken/")
     assert res.status_code == 404
+
+
+@pytest.mark.parametrize("username_or_email", ["username", "email@example.com"])
+def test_login_view_valid(db, create_user, client, username_or_email):
+    user = create_user(username="username", email="email@example.com")
+    user.set_password("password123321")
+    user.is_email_verified = True
+    user.save()
+
+    res = client.post(
+        "/users/login/",
+        {
+            "username_or_email": username_or_email,
+            "password": "password123321",
+        },
+    )
+
+    assert res.status_code == 200
+    assert res.json() == {"msg": "Login successful"}
+
+
+@pytest.mark.parametrize(
+    "username_or_email",
+    [
+        "invalid_username",
+        "invalid_email@example.com",
+    ],
+)
+def test_login_view_invalid(db, create_user, client, username_or_email):
+    user = create_user()
+    user.is_email_verified = True
+    user.save()
+
+    res = client.post(
+        "/users/login/",
+        {
+            "username_or_email": username_or_email,
+            "password": "password123321",
+        },
+    )
+
+    assert res.status_code == 400
+    assert res.json() == {"non_field_errors": ["Invalid Username or password"]}
