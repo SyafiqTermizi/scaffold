@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import serializers
 
-from scaffold.users.serializers import UserCreationSerializer
+from scaffold.users.serializers import UserCreationSerializer, AuthenticationSerializer
 
 
 def test_serializer_validate_invalid_email(db, create_user):
@@ -47,7 +47,7 @@ def test_serializer_validate_password(db, create_user):
     UserCreationSerializer should raise validation error if password_1 and password_2
     not matched
     """
-    user = create_user()
+    create_user()
     serializer = UserCreationSerializer(
         data={
             "username": "user.username",
@@ -79,3 +79,54 @@ def test_serializer_valid_data(db, create_user):
 
     assert serializer.is_valid(raise_exception=True)
     assert serializer.save()
+
+
+@pytest.mark.parametrize(
+    "username_or_email,is_email",
+    [
+        pytest.param("username", False),
+        pytest.param("email@example.com", True),
+    ],
+)
+def test_authentication_serializer_valid(db, create_user, username_or_email, is_email):
+    user = create_user(username="username", email="email@example.com")
+    user.set_password("password123321")
+    user.is_email_verified = True
+    user.save()
+
+    data = {
+        "username_or_email": username_or_email,
+        "password": "password123321",
+    }
+    serializer = AuthenticationSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    assert serializer.is_email == is_email
+
+
+@pytest.mark.parametrize(
+    "username_or_email,is_email",
+    [
+        pytest.param("invalid_username", False),
+        pytest.param("invalid_email@example.com", True),
+    ],
+)
+def test_authentication_serializer_invalid(
+    db,
+    create_user,
+    username_or_email,
+    is_email,
+):
+    user = create_user()
+    user.is_email_verified = True
+    user.save()
+
+    data = {
+        "username_or_email": username_or_email,
+        "password": "password123321",
+    }
+    serializer = AuthenticationSerializer(data=data)
+
+    with pytest.raises(serializers.ValidationError):
+        assert serializer.is_valid(raise_exception=True)
+
+    assert serializer.is_email == is_email

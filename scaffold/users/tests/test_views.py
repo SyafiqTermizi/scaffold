@@ -1,7 +1,5 @@
 import pytest
 
-from scaffold.users.views import UserCreationAPIView
-
 
 def test_user_creation_api_view_success(db, api_client):
     """

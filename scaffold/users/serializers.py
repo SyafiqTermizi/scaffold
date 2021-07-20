@@ -1,4 +1,7 @@
+from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import validate_email
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from .models import User
@@ -53,3 +56,42 @@ class UserCreationSerializer(serializers.ModelSerializer):
             email=validated_data["email"],
             password=validated_data["password_1"],
         )
+
+
+class AuthenticationSerializer(serializers.Serializer):
+    username_or_email = serializers.CharField(required=True)
+    password = serializers.CharField(
+        style={"input_type": "password"},
+        trim_whitespace=False,
+        write_only=True,
+    )
+
+    is_email = False
+
+    def validate_username_or_email(self, username_or_email):
+        try:
+            validate_email(username_or_email)
+        except ValidationError:
+            pass
+        else:
+            self.is_email = True
+        return username_or_email
+
+    def validate(self, attrs):
+        validated_attrs = super().validate(attrs)
+
+        if self.is_email:
+            user = authenticate(
+                email=validated_attrs["username_or_email"],
+                password=validated_attrs["password"],
+            )
+        else:
+            user = authenticate(
+                username=validated_attrs["username_or_email"],
+                password=validated_attrs["password"],
+            )
+
+        if not user:
+            raise serializers.ValidationError("Invalid Username or password")
+
+        return validated_attrs
