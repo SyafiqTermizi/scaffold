@@ -5,16 +5,19 @@ from django.urls import reverse
 from .models import User, EmailVerificationToken
 
 
+def get_full_url(url_part=""):
+    if settings.DEBUG:
+        return f"http://localhost:8000{url_part}"
+    return f"{settings.ALLOWED_HOSTS[0]}/{url_part}"
+
+
 @shared_task
 def create_token_and_send_email(user_id: int):
     user = User.objects.get(pk=user_id)
     token = EmailVerificationToken.objects.create(user=user)
     token_verify_url = reverse("users:verify-token", kwargs={"token": token.token})
 
-    if settings.DEBUG:
-        full_url = f"http://localhost:8000{token_verify_url}"
-    else:
-        full_url = f"{settings.ALLOWED_HOSTS[0]}/{token_verify_url}"
+    full_url = get_full_url(token_verify_url)
 
     message = f"""
     Hi {user.username},
@@ -24,6 +27,25 @@ def create_token_and_send_email(user_id: int):
     {full_url}
 
     Welcome to Scaffold!
+    The Scaffold Team
+    """
+
+    user.email_user(
+        "Email Verification",
+        message=message,
+        from_email="no-reply@scaffold.com",
+    )
+
+
+@shared_task
+def send_forget_password_email(user_id: int):
+    user = User.objects.get(pk=user_id)
+    message = f"""
+    Hi {user.username},
+
+    You're receiving this email because you requested a password reset for your user account at {get_full_url()}
+
+    Thanks for using our site!
     The Scaffold Team
     """
 

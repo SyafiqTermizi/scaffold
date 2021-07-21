@@ -149,7 +149,7 @@ def test_login_view_valid(db, create_user, client, username_or_email):
     )
 
     assert res.status_code == 200
-    assert res.json() == {"msg": "Login successful"}
+    assert res.json() == {"msg": "Success"}
 
 
 @pytest.mark.parametrize(
@@ -174,3 +174,19 @@ def test_login_view_invalid(db, create_user, client, username_or_email):
 
     assert res.status_code == 400
     assert res.json() == {"non_field_errors": ["Invalid Username or password"]}
+
+
+def test_forget_password_valid(db, client, create_user):
+    user = create_user()
+
+    res = client.post("/users/forgot-password/", {"email": user.email})
+
+    assert res.status_code == 200
+    assert res.json() == {"msg": "Success"}
+
+
+def test_forget_password_invalid(db, client):
+    res = client.post("/users/forgot-password/", {"email": "invalidemail@email.com"})
+
+    assert res.status_code == 200
+    assert res.json() == {"msg": "Success"}
