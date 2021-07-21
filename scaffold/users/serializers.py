@@ -97,3 +97,18 @@ class AuthenticationSerializer(serializers.Serializer):
 
         self.user = user
         return validated_attrs
+
+
+class FindUserByEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    user = None
+
+    def validate_email(self, email: str):
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("User with given email does not exist")
+        else:
+            self.user = user
+        return email

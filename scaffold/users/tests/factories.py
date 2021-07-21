@@ -1,9 +1,12 @@
+from django.db.models.signals import post_save
+
 import factory
 from factory.django import DjangoModelFactory
 
 from scaffold.users.models import User, EmailVerificationToken
 
 
+@factory.django.mute_signals(post_save)
 class UserFactory(DjangoModelFactory):
     username = factory.Faker("name")
     email = factory.Faker("email")

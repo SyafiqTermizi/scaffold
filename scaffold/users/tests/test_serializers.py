@@ -1,7 +1,11 @@
 import pytest
 from rest_framework import serializers
 
-from scaffold.users.serializers import UserCreationSerializer, AuthenticationSerializer
+from scaffold.users.serializers import (
+    UserCreationSerializer,
+    AuthenticationSerializer,
+    FindUserByEmailSerializer,
+)
 
 
 def test_serializer_validate_invalid_email(db, create_user):
@@ -42,12 +46,11 @@ def test_serializer_validate_invalid_username(db, create_user):
         serializer.is_valid(raise_exception=True)
 
 
-def test_serializer_validate_password(db, create_user):
+def test_serializer_validate_password(db):
     """
     UserCreationSerializer should raise validation error if password_1 and password_2
     not matched
     """
-    create_user()
     serializer = UserCreationSerializer(
         data={
             "username": "user.username",
@@ -61,7 +64,7 @@ def test_serializer_validate_password(db, create_user):
         serializer.is_valid(raise_exception=True)
 
 
-def test_serializer_valid_data(db, create_user):
+def test_serializer_valid_data(db):
     """
     UserCreationSerializer should not raise validation error if
     1. Username does not already exist
@@ -130,3 +133,21 @@ def test_authentication_serializer_invalid(
         assert serializer.is_valid(raise_exception=True)
 
     assert serializer.is_email == is_email
+
+
+def test_find_user_by_email_serializer_valid(db, create_user):
+    user = create_user()
+    data = {"email": user.email}
+
+    serializer = FindUserByEmailSerializer(data=data)
+    assert serializer.is_valid(raise_exception=True)
+    assert serializer.user.pk == user.pk
+
+
+def test_find_user_by_email_serializer_invalid(db):
+    data = {"email": "email@email.com"}
+
+    serializer = FindUserByEmailSerializer(data=data)
+
+    with pytest.raises(serializers.ValidationError):
+        assert serializer.is_valid(raise_exception=True)
