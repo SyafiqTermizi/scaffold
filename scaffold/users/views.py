@@ -1,12 +1,12 @@
 from typing import Any, Dict
-from _pytest.python_api import raises
 
 from django.contrib.auth import login
+from django.contrib.auth.views import PasswordResetConfirmView
 from django.http import Http404
+from django.http.response import JsonResponse
 from django.views.generic import TemplateView
 from rest_framework import serializers
 from rest_framework.response import Response
-from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from rest_framework.generics import CreateAPIView
 
@@ -57,3 +57,12 @@ class ForgotPasswordView(APIView):
             send_forget_password_email.delay(serializer.user.pk)
 
         return Response({"msg": "Success"})
+
+
+class ResetForgotPasswordView(PasswordResetConfirmView):
+    def form_valid(self, form):
+        user = form.save()
+        del self.request.session["_password_reset_token"]
+        if self.post_reset_login:
+            login(self.request, user, self.post_reset_login_backend)
+        return JsonResponse({"msg": "Success"})

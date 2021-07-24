@@ -5,6 +5,7 @@ from .views import (
     EmailVerificationTokenView,
     LoginView,
     ForgotPasswordView,
+    ResetForgotPasswordView,
 )
 
 app_name = "users"
@@ -15,6 +16,11 @@ urlpatterns = [
         "forgot-password/",
         ForgotPasswordView.as_view(),
         name="forgot-password",
+    ),
+    path(
+        "reset-forgot-password/<str:uidb64>/<str:token>/",
+        ResetForgotPasswordView.as_view(),
+        name="reset-forgot-password",
     ),
     path(
         "verify-token/<str:token>/",

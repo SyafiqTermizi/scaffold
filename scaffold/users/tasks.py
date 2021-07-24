@@ -1,6 +1,9 @@
 from celery import shared_task
 from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 
 from .models import User, EmailVerificationToken
 
@@ -40,17 +43,26 @@ def create_token_and_send_email(user_id: int):
 @shared_task
 def send_forget_password_email(user_id: int):
     user = User.objects.get(pk=user_id)
+    uid = urlsafe_base64_encode(force_bytes(user_id))
+    token = default_token_generator.make_token(user)
+    reset_password_url = reverse(
+        "users:reset-forgot-password",
+        kwargs={"uidb64": uid, "token": token},
+    )
+
+    full_url = get_full_url(reset_password_url)
+
     message = f"""
     Hi {user.username},
 
-    You're receiving this email because you requested a password reset for your user account at {get_full_url()}
+    You're receiving this email because you requested a password reset for your user account at {full_url}
 
     Thanks for using our site!
     The Scaffold Team
     """
 
     user.email_user(
-        "Email Verification",
+        "Password Reset",
         message=message,
         from_email="no-reply@scaffold.com",
     )
