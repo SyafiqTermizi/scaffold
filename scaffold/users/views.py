@@ -1,7 +1,10 @@
 from typing import Any, Dict
 
 from django.contrib.auth import login
-from django.contrib.auth.views import PasswordResetConfirmView
+from django.contrib.auth.views import (
+    LogoutView as DjangoLogoutView,
+    PasswordResetConfirmView,
+)
 from django.http import Http404
 from django.http.response import JsonResponse
 from django.views.generic import TemplateView
@@ -43,6 +46,11 @@ class LoginView(APIView):
         login(request=request, user=serializer.user)
 
         return Response({"msg": "Success"})
+
+
+class LogoutView(DjangoLogoutView):
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({"msg": "Success"})
 
 
 class ForgotPasswordView(APIView):

@@ -176,6 +176,13 @@ def test_login_view_invalid(db, create_user, client, username_or_email):
     assert res.json() == {"non_field_errors": ["Invalid Username or password"]}
 
 
+def test_logout_view(db, client):
+    res = client.post("/users/logout/")
+
+    assert res.status_code == 200
+    assert res.json() == {"msg": "Success"}
+
+
 def test_forget_password_valid(db, client, create_user):
     user = create_user()
 
